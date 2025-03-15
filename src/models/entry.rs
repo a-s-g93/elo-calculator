@@ -1,4 +1,5 @@
 
+#[derive(Debug)]
 pub struct Entry {
     pub id: String,
     pub name: String,
