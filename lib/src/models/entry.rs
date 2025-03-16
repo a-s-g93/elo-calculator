@@ -21,15 +21,13 @@ impl Default for Entry {
 
 impl Entry {
     pub fn from_cli_input(id: String, place: i8, input_elo: String) -> Result<Self, String> {
-
         if place < 1 {
             return Err("Place must be greater than 0".to_string());
         }
 
-       
         let input_elo: i32 = match input_elo.parse() {
             Ok(elo) => elo,
-            Err(e) => return Err(e.to_string())
+            Err(e) => return Err(e.to_string()),
         };
 
         Ok(Self {

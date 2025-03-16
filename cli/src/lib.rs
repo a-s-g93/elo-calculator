@@ -1,20 +1,34 @@
-use models::entry::Entry;
-use services::calculate_elos;
+// Re-export commonly used types for better ergonomics
+use elo_calculator::models::Entry;
+use elo_calculator::services::calculate_elos::update_elos_for_group;
+
+// Internal imports for implementation details
 use std::env;
 use std::process;
 
-mod models {
-    pub mod entry;
+fn parse_inputs() -> Result<Vec<Entry>, String> {
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 3 {
+        return Err("Must provide more than 1 Elo to compute Elo rating changes".to_string());
+    };
+
+    let mut entries: Vec<Entry> = vec![];
+
+    for i in 1..args.len() {
+        let entry =
+            match Entry::from_cli_input(String::from(i.to_string()), i as i8, args[i].clone()) {
+                Ok(ent) => ent,
+                Err(e) => return Err(e),
+            };
+
+        entries.push(entry);
+    }
+
+    Ok(entries)
 }
 
-mod services {
-    pub mod calculate_elos;
-}
-
-
-fn main() {
-    // run_demo();
-
+pub fn run() {
     let mut entries = match parse_inputs() {
         Ok(entries) => entries,
         Err(e) => {
@@ -24,40 +38,21 @@ fn main() {
     };
     let entry_refs = entries.iter_mut().collect();
 
-    calculate_elos::update_elos_for_group(entry_refs, 32);
+    update_elos_for_group(entry_refs, 32);
 
     for entry in entries {
-        println!("{}: {} -> {}", entry.name, entry.input_elo, entry.output_elo.unwrap_or(0));
+        println!(
+            "{}: {} -> {}",
+            entry.name,
+            entry.input_elo,
+            entry.output_elo.unwrap_or(0)
+        );
     }
 }
-
-
-fn parse_inputs() -> Result<Vec<Entry>, String> {
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() < 3 {
-        return Err("Must provide more than 1 Elo to compute Elo rating changes".to_string());
-    };
-    
-    let mut entries: Vec<Entry> = vec![];
-    
-    for i in 1..args.len() {
-        let entry = match Entry::from_cli_input(String::from(i.to_string()), i as i8, args[i].clone()) {
-            Ok(ent) => ent,
-            Err(e) => return Err(e)
-        };
-
-        entries.push(entry);
-    }
-
-    Ok(entries)
-}
-
-
 
 /// Demo placeholder
 #[allow(dead_code)]
-fn run_demo() -> () {
+pub fn run_demo() -> () {
     let mut entry1 = Entry {
         id: String::from("1"),
         input_elo: 1020,
@@ -82,7 +77,7 @@ fn run_demo() -> () {
 
     let entries = vec![&mut entry1, &mut entry2, &mut entry3];
 
-    calculate_elos::update_elos_for_group(entries, 32);
+    update_elos_for_group(entries, 32);
 
     println!(
         "Updated {} elo: {} -> {}",
