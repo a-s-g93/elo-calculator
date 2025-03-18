@@ -4,4 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-web = "4.10.2"
 elo-calculator = { path = "../lib" }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
