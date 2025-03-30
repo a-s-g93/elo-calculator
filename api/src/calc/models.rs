@@ -2,6 +2,13 @@ use elo_calculator::Entry;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Clone)]
-pub struct RequestData {
+pub struct SingleRequestData {
     pub elo_entries: Vec<Entry>,
+    pub k: i32,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct MultipleRequestData {
+    pub elo_entries: Vec<Vec<Entry>>,
+    pub k: i32,
 }

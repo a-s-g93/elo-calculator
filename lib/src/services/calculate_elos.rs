@@ -3,6 +3,8 @@
 //! This module provides functionality for calculating and updating Elo ratings
 //! for a group of players based on their performance.
 
+use calculator::update_event_input_elos_from_previous_event;
+
 use crate::models::entry::Entry;
 use std::collections::HashMap;
 
@@ -18,7 +20,7 @@ pub fn update_elos_for_group(mut entries: Vec<&mut Entry>, k: i32) -> Vec<&mut E
     // First collect all the data we need for calculation
     let computation_inputs: Vec<(String, i32, i8)> = entries
         .iter()
-        .map(|e| (e.id.clone(), e.input_elo, e.place))
+        .map(|e| (e.id.clone(), e.input_elo.unwrap(), e.place))
         .collect();
 
     // Calculate Elo changes
@@ -27,11 +29,38 @@ pub fn update_elos_for_group(mut entries: Vec<&mut Entry>, k: i32) -> Vec<&mut E
     // Update each entry's Elo rating
     for entry in entries.iter_mut() {
         if let Some(&change) = elo_changes.get(&entry.id) {
-            entry.output_elo = Some(entry.input_elo + change);
+            entry.output_elo = Some(entry.input_elo.unwrap() + change);
         }
     }
 
     entries
+}
+
+pub fn update_elos_for_sequence(mut groups: Vec<Vec<&mut Entry>>, k: i32) -> Vec<Vec<&mut Entry>> {
+    let mut elo_hash = HashMap::<String, i32>::new();
+
+    // Process each group one at a time
+    for i in 0..groups.len() {
+        // Extract the current group
+        let mut current_group = Vec::new();
+        std::mem::swap(&mut current_group, &mut groups[i]);
+
+        current_group = update_event_input_elos_from_previous_event(current_group, &elo_hash);
+        // Update Elo ratings for this group
+        let updated_group = update_elos_for_group(current_group, k);
+
+        // Store the updated Elo values in our hash map
+        for entry in &updated_group {
+            if let Some(new_elo) = entry.output_elo {
+                elo_hash.insert(entry.id.clone(), new_elo);
+            }
+        }
+
+        // Put the updated group back
+        groups[i] = updated_group;
+    }
+
+    groups
 }
 
 /// Private module containing the Elo calculation implementation
@@ -99,19 +128,36 @@ mod calculator {
             .map(|(id, r)| (id.clone(), (k as f32 * *r).round() as i32))
             .collect()
     }
+
+    #[allow(dead_code)]
+    pub(crate) fn update_event_input_elos_from_previous_event<'a>(
+        mut entries: Vec<&'a mut Entry>,
+        elo_hash: &HashMap<String, i32>,
+    ) -> Vec<&'a mut Entry> {
+        for entry in entries.iter_mut() {
+            if let Some(update) = elo_hash.get(&entry.id) {
+                entry.input_elo = Some(*update);
+            }
+        }
+
+        entries
+    }
 }
 
 // End of calculator module
 
 #[cfg(test)]
 mod tests {
-    use super::calculator::{calculate_elo_change_for_group, calculate_elo_change_for_pair};
+    use super::calculator::{
+        calculate_elo_change_for_group, calculate_elo_change_for_pair,
+        update_event_input_elos_from_previous_event,
+    };
     use super::*;
 
     fn create_player_1_struct() -> Entry {
         Entry {
             id: String::from("1"),
-            input_elo: 1020,
+            input_elo: Some(1020),
             place: 1,
             ..Default::default()
         }
@@ -128,7 +174,7 @@ mod tests {
     fn create_player_2_struct() -> Entry {
         Entry {
             id: String::from("2"),
-            input_elo: 900,
+            input_elo: Some(900),
             place: 2,
             ..Default::default()
         }
@@ -141,7 +187,7 @@ mod tests {
     fn create_player_3_struct() -> Entry {
         Entry {
             id: String::from("3"),
-            input_elo: 800,
+            input_elo: Some(800),
             place: 3,
             ..Default::default()
         }
@@ -158,7 +204,7 @@ mod tests {
     fn create_player_4_struct() -> Entry {
         Entry {
             id: String::from("4"),
-            input_elo: 1000,
+            input_elo: Some(1000),
             place: 4,
             ..Default::default()
         }
@@ -314,5 +360,44 @@ mod tests {
         assert_eq!(result[1].output_elo, Some(905));
         assert_eq!(result[2].output_elo, Some(801));
         assert_eq!(result[3].output_elo, Some(985));
+    }
+
+    #[test]
+    fn test_update_elos_for_sequence() {
+        let mut player1 = create_player_1_struct();
+        let mut player2 = create_player_2_struct();
+        let mut player3 = create_player_3_struct();
+        let mut player1_second_event = create_player_1_struct();
+
+        let result = update_elos_for_sequence(
+            vec![
+                vec![&mut player1, &mut player2],
+                vec![&mut player1_second_event, &mut player3],
+            ],
+            16,
+        );
+
+        assert_eq!(result[0][0].output_elo, Some(1025));
+        assert_eq!(result[0][1].output_elo, Some(895));
+        assert_eq!(result[1][0].output_elo, Some(1028));
+        assert_eq!(result[1][1].output_elo, Some(797));
+    }
+
+    #[test]
+    fn test_update_event_input_elos_from_previous_event() {
+        let mut player1 = create_player_1_struct();
+        let mut player2 = create_player_2_struct();
+
+        let mut elo_hash = HashMap::new();
+        elo_hash.insert(String::from("1"), 123);
+        elo_hash.insert(String::from("2"), 456);
+
+        let result = update_event_input_elos_from_previous_event(
+            vec![&mut player1, &mut player2],
+            &elo_hash,
+        );
+
+        assert_eq!(result[0].input_elo.unwrap(), 123);
+        assert_eq!(result[1].input_elo.unwrap(), 456);
     }
 }

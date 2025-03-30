@@ -44,7 +44,7 @@ pub fn run() {
         println!(
             "{}: {} -> {}",
             entry.name,
-            entry.input_elo,
+            entry.input_elo.unwrap_or(0),
             entry.output_elo.unwrap_or(0)
         );
     }
@@ -55,14 +55,14 @@ pub fn run() {
 pub fn run_demo() -> () {
     let mut entry1 = Entry {
         id: String::from("1"),
-        input_elo: 1020,
+        input_elo: Some(1020),
         name: String::from("Donkey Kong"),
         place: 1,
         ..Default::default()
     };
     let mut entry2 = Entry {
         id: String::from("2"),
-        input_elo: 1100,
+        input_elo: Some(1100),
         name: String::from("Mario"),
         place: 2,
         ..Default::default()
@@ -70,7 +70,7 @@ pub fn run_demo() -> () {
     let mut entry3 = Entry {
         id: String::from("3"),
         name: String::from("Toad"),
-        input_elo: 800,
+        input_elo: Some(800),
         place: 3,
         ..Default::default()
     };
@@ -82,19 +82,19 @@ pub fn run_demo() -> () {
     println!(
         "Updated {} elo: {} -> {}",
         entry1.name,
-        entry1.input_elo,
+        entry1.input_elo.unwrap_or(0),
         entry1.output_elo.unwrap_or(0)
     );
     println!(
         "Updated {} elo: {} -> {}",
         entry2.name,
-        entry2.input_elo,
+        entry2.input_elo.unwrap_or(0),
         entry2.output_elo.unwrap_or(0)
     );
     println!(
         "Updated {} elo: {} -> {}",
         entry3.name,
-        entry3.input_elo,
+        entry3.input_elo.unwrap_or(0),
         entry3.output_elo.unwrap_or(0)
     );
 }

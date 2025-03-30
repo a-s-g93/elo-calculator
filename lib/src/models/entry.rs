@@ -5,7 +5,7 @@ pub struct Entry {
     pub id: String,
     pub name: String,
     pub place: i8,
-    pub input_elo: i32,
+    pub input_elo: Option<i32>,
     pub output_elo: Option<i32>,
 }
 
@@ -15,7 +15,7 @@ impl Default for Entry {
             id: String::from("0"),
             name: String::from("Unknown"),
             place: 1,
-            input_elo: 1000,
+            input_elo: Some(1000),
             output_elo: None,
         }
     }
@@ -36,7 +36,7 @@ impl Entry {
             id: id.clone(),
             name: String::from(String::from("Entry ") + &id),
             place,
-            input_elo,
+            input_elo: Some(input_elo),
             ..Default::default()
         })
     }
