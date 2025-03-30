@@ -31,11 +31,12 @@ pub fn update_elos_for_group(mut entries: Vec<&mut Entry>, k: i32) -> Vec<&mut E
         .iter()
         .enumerate()
         .filter_map(|(idx, entry)| {
-            elo_changes.get(entry.id.as_str())
+            elo_changes
+                .get(entry.id.as_str())
                 .map(|&change| (idx, change))
         })
         .collect();
-    
+
     // Now apply the changes separately
     for (idx, change) in entry_changes {
         let entry = &mut entries[idx];
@@ -55,8 +56,9 @@ pub fn update_elos_for_sequence(mut groups: Vec<Vec<&mut Entry>>, k: i32) -> Vec
         std::mem::swap(&mut current_group, &mut groups[i]);
 
         // Update entries from previous event
-        let group_with_updated_inputs = update_event_input_elos_from_previous_event(current_group, &elo_hash);
-        
+        let group_with_updated_inputs =
+            update_event_input_elos_from_previous_event(current_group, &elo_hash);
+
         // Update Elo ratings for this group
         let group_with_updated_outputs = update_elos_for_group(group_with_updated_inputs, k);
 
