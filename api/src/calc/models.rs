@@ -9,6 +9,6 @@ pub struct SingleRequestData {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct MultipleRequestData {
-    pub elo_entries: Vec<Vec<Entry>>,
+    pub elo_entry_sequence: Vec<Vec<Entry>>,
     pub k: i32,
 }
