@@ -18,19 +18,28 @@ use std::collections::HashMap;
 /// A vector of mutable references to the updated Entry structs
 pub fn update_elos_for_group(mut entries: Vec<&mut Entry>, k: i32) -> Vec<&mut Entry> {
     // First collect all the data we need for calculation
-    let computation_inputs: Vec<(String, i32, i8)> = entries
+    let computation_inputs: Vec<(&str, i32, i8)> = entries
         .iter()
-        .map(|e| (e.id.clone(), e.input_elo.unwrap(), e.place))
+        .map(|e| (e.id.as_str(), e.input_elo.unwrap(), e.place))
         .collect();
 
     // Calculate Elo changes
     let elo_changes = calculator::calculate_elo_change_for_group(computation_inputs, k);
 
-    // Update each entry's Elo rating
-    for entry in entries.iter_mut() {
-        if let Some(&change) = elo_changes.get(&entry.id) {
-            entry.output_elo = Some(entry.input_elo.unwrap() + change);
-        }
+    // Collect the changes first to avoid borrowing conflicts
+    let entry_changes: Vec<(usize, i32)> = entries
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, entry)| {
+            elo_changes.get(entry.id.as_str())
+                .map(|&change| (idx, change))
+        })
+        .collect();
+    
+    // Now apply the changes separately
+    for (idx, change) in entry_changes {
+        let entry = &mut entries[idx];
+        entry.output_elo = Some(entry.input_elo.unwrap() + change);
     }
 
     entries
@@ -45,19 +54,24 @@ pub fn update_elos_for_sequence(mut groups: Vec<Vec<&mut Entry>>, k: i32) -> Vec
         let mut current_group = Vec::new();
         std::mem::swap(&mut current_group, &mut groups[i]);
 
-        current_group = update_event_input_elos_from_previous_event(current_group, &elo_hash);
+        // Update entries from previous event
+        let group_with_updated_inputs = update_event_input_elos_from_previous_event(current_group, &elo_hash);
+        
         // Update Elo ratings for this group
-        let updated_group = update_elos_for_group(current_group, k);
+        let group_with_updated_outputs = update_elos_for_group(group_with_updated_inputs, k);
+
+        let mut new_group = Vec::new();
 
         // Store the updated Elo values in our hash map
-        for entry in &updated_group {
+        for entry in group_with_updated_outputs {
             if let Some(new_elo) = entry.output_elo {
                 elo_hash.insert(entry.id.clone(), new_elo);
             }
+            new_group.push(entry);
         }
 
         // Put the updated group back
-        groups[i] = updated_group;
+        groups[i] = new_group;
     }
 
     groups
@@ -101,11 +115,11 @@ mod calculator {
     /// Calculate Elo changes for a group of players
     #[allow(dead_code)]
     pub(crate) fn calculate_elo_change_for_group(
-        entries: Vec<(String, i32, i8)>,
+        entries: Vec<(&str, i32, i8)>,
         k: i32,
-    ) -> HashMap<String, i32> {
-        let mut r_map: HashMap<String, f32> = entries.iter().map(|e| (e.0.clone(), 0.0)).collect();
-        let id_list: Vec<String> = entries.iter().map(|e| e.0.clone()).collect();
+    ) -> HashMap<&str, i32> {
+        let mut r_map: HashMap<&str, f32> = entries.iter().map(|e| (e.0, 0.0)).collect();
+        let id_list: Vec<&str> = entries.iter().map(|e| e.0).collect();
         let group_size = id_list.len();
 
         for i in 0..group_size {
@@ -118,14 +132,14 @@ mod calculator {
                 let temp_r_ij =
                     calculate_elo_change_for_pair((entry_i.1, entry_i.2), (entry_j.1, entry_j.2));
 
-                r_map.insert(i_id.clone(), r_map.get(i_id).unwrap() + temp_r_ij.0);
-                r_map.insert(j_id.clone(), r_map.get(j_id).unwrap() + temp_r_ij.1);
+                r_map.insert(i_id, r_map.get(i_id).unwrap() + temp_r_ij.0);
+                r_map.insert(j_id, r_map.get(j_id).unwrap() + temp_r_ij.1);
             }
         }
 
         r_map
             .iter()
-            .map(|(id, r)| (id.clone(), (k as f32 * *r).round() as i32))
+            .map(|(id, r)| (*id, (k as f32 * *r).round() as i32))
             .collect()
     }
 
@@ -135,7 +149,7 @@ mod calculator {
         elo_hash: &HashMap<String, i32>,
     ) -> Vec<&'a mut Entry> {
         for entry in entries.iter_mut() {
-            if let Some(update) = elo_hash.get(&entry.id) {
+            if let Some(update) = elo_hash.get(entry.id.as_str()) {
                 entry.input_elo = Some(*update);
             }
         }
@@ -163,8 +177,8 @@ mod tests {
         }
     }
 
-    fn create_player_1_tuple_with_id() -> (String, i32, i8) {
-        (String::from("1"), 1020, 1)
+    fn create_player_1_tuple_with_id() -> (&'static str, i32, i8) {
+        ("1", 1020, 1)
     }
 
     fn create_player_1_tuple_no_id() -> (i32, i8) {
@@ -180,8 +194,8 @@ mod tests {
         }
     }
 
-    fn create_player_2_tuple_with_id() -> (String, i32, i8) {
-        (String::from("2"), 900, 2)
+    fn create_player_2_tuple_with_id() -> (&'static str, i32, i8) {
+        ("2", 900, 2)
     }
 
     fn create_player_3_struct() -> Entry {
@@ -193,8 +207,8 @@ mod tests {
         }
     }
 
-    fn create_player_3_tuple_with_id() -> (String, i32, i8) {
-        (String::from("3"), 800, 3)
+    fn create_player_3_tuple_with_id() -> (&'static str, i32, i8) {
+        ("3", 800, 3)
     }
 
     fn create_player_3_tuple_no_id() -> (i32, i8) {
@@ -210,8 +224,8 @@ mod tests {
         }
     }
 
-    fn create_player_4_tuple_with_id() -> (String, i32, i8) {
-        (String::from("4"), 1000, 4)
+    fn create_player_4_tuple_with_id() -> (&'static str, i32, i8) {
+        ("4", 1000, 4)
     }
 
     fn create_player_4_tuple_no_id() -> (i32, i8) {
