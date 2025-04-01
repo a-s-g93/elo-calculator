@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin>=0.14,<0.15"]
+requires = ["maturin>=1.8,<1.9"]
 build-backend = "maturin"
 
 [project]
@@ -8,4 +8,14 @@ requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
 ]
+dynamic = ["version"]
+
+[dependencies]
+# maturin = "1.4.0" # Removed build dependency
+# rustimport = "1.4.0" # Removed build dependency
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "elo_calculator"

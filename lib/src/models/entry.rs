@@ -1,12 +1,40 @@
+use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[pyclass]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Entry {
+    #[pyo3(get, set)]
     pub id: String,
+    #[pyo3(get, set)]
     pub name: String,
+    #[pyo3(get, set)]
     pub place: i8,
+    #[pyo3(get, set)]
     pub input_elo: Option<i32>,
+    #[pyo3(get, set)]
     pub output_elo: Option<i32>,
+}
+
+#[pymethods]
+impl Entry {
+    #[new]
+    pub fn new(id: String, name: String, place: i8, input_elo: Option<i32>) -> Self {
+        Self {
+            id,
+            name,
+            place,
+            input_elo,
+            output_elo: None,
+        }
+    }
+
+    pub fn __repr__(&self) -> String {
+        format!(
+            "Entry(id='{}', name='{}', place={}, input_elo={:?}, output_elo={:?})",
+            self.id, self.name, self.place, self.input_elo, self.output_elo
+        )
+    }
 }
 
 impl Default for Entry {
