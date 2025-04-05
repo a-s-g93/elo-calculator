@@ -19,14 +19,14 @@ async fn calculate_elo_multiple(input_data: web::Json<MultipleRequestData>) -> i
     let k = input_data.k;
 
     let mut sequence_refs: Vec<Vec<&mut Entry>> = Vec::new();
-    
+
     for group in &mut sequence {
         let group_refs: Vec<&mut Entry> = group.iter_mut().collect();
         sequence_refs.push(group_refs);
     }
-    
+
     update_elos_for_sequence(sequence_refs, k);
-    
+
     HttpResponse::Ok().json(sequence)
 }
 

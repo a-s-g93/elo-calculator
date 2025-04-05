@@ -8,6 +8,27 @@ use calculator::update_event_input_elos_from_previous_event;
 use crate::models::entry::Entry;
 use std::collections::HashMap;
 
+/// Calculate Elo updates for a simple 1v1 matchup
+///
+/// This function provides a simplified way to calculate updated Elo ratings
+/// for a winner and loser without needing to create Entry structs.
+/// This function does not support ties.
+///
+/// # Arguments
+/// * `winner_elo` - The current Elo rating of the winner
+/// * `loser_elo` - The current Elo rating of the loser
+/// * `k` - The K-factor used to control rating volatility
+///
+/// # Returns
+/// A tuple containing (updated_winner_elo, updated_loser_elo)
+pub fn quick_calc(winner_elo: i32, loser_elo: i32, k: i32) -> (i32, i32) {
+    let updates = calculator::calculate_elo_change_for_pair((winner_elo, 1), (loser_elo, 2));
+    (
+        winner_elo + ((updates.0 * k as f32).round() as i32),
+        loser_elo + ((updates.1 * k as f32).round() as i32),
+    )
+}
+
 /// Updates Elo ratings for a group of players based on their places.
 ///
 /// # Arguments
@@ -419,17 +440,31 @@ mod tests {
 
     #[test]
     fn test_update_event_input_elos_from_previous_event_no_input_elo_field() {
-        let mut player = Entry{id: String::from("1"), name: String::from("DK"), place: 1, ..Default::default()};
+        let mut player = Entry {
+            id: String::from("1"),
+            name: String::from("DK"),
+            place: 1,
+            ..Default::default()
+        };
 
         let mut elo_hash = HashMap::new();
         elo_hash.insert(String::from("1"), 123);
 
-        let result = update_event_input_elos_from_previous_event(
-            vec![&mut player],
-            &elo_hash,
-        );
+        let result = update_event_input_elos_from_previous_event(vec![&mut player], &elo_hash);
 
         assert_eq!(result[0].input_elo.unwrap(), 123);
+    }
+
+    #[test]
+    fn test_quick_calc() {
+        let w = 1020;
+        let l = 900;
+        let k = 32;
+
+        let result = quick_calc(w, l, k);
+
+        assert_eq!(result.0, 1031);
+        assert_eq!(result.1, 889);
 
     }
 }
