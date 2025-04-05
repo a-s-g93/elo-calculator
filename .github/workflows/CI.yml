@@ -26,16 +26,22 @@ jobs:
         platform:
           - runner: ubuntu-22.04
             target: x86_64
+            working-directory: ./python_bindings  
           - runner: ubuntu-22.04
             target: x86
+            working-directory: ./python_bindings
           - runner: ubuntu-22.04
             target: aarch64
+            working-directory: ./python_bindings
           - runner: ubuntu-22.04
             target: armv7
+            working-directory: ./python_bindings
           - runner: ubuntu-22.04
             target: s390x
+            working-directory: ./python_bindings
           - runner: ubuntu-22.04
             target: ppc64le
+            working-directory: ./python_bindings
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
