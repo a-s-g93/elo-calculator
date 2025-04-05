@@ -6,7 +6,3 @@ members = [
     "python_bindings"
 ]
 
-[package]
-name = "elo-calculator-root"
-version = "0.1.0"
-edition = "2021"
