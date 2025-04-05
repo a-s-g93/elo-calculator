@@ -62,7 +62,7 @@ impl Entry {
 
         Ok(Self {
             id: id.clone(),
-            name: String::from(String::from("Entry ") + &id),
+            name: String::from("Entry ") + &id,
             place,
             input_elo: Some(input_elo),
             ..Default::default()

@@ -2,6 +2,7 @@
 //!
 //! This module provides functionality for calculating and updating Elo ratings
 //! for a group of players based on their performance.
+use std::cmp::Ordering;
 
 use calculator::update_event_input_elos_from_previous_event;
 
@@ -71,6 +72,7 @@ pub fn update_elos_for_sequence(mut groups: Vec<Vec<&mut Entry>>, k: i32) -> Vec
     let mut elo_hash = HashMap::<String, i32>::new();
 
     // Process each group one at a time
+    #[allow(clippy::needless_range_loop)]
     for i in 0..groups.len() {
         // Extract the current group
         let mut current_group = Vec::new();
@@ -121,15 +123,19 @@ mod calculator {
         let s1: f32;
         let s2: f32;
 
-        if entry_one.1 < entry_two.1 {
-            s1 = 1.0;
-            s2 = 0.0;
-        } else if entry_one.1 > entry_two.1 {
-            s1 = 0.0;
-            s2 = 1.0;
-        } else {
-            s1 = 0.5;
-            s2 = 0.5;
+        match entry_one.1.cmp(&entry_two.1) {
+            Ordering::Less => {
+                s1 = 1.0;
+                s2 = 0.0;
+            }
+            Ordering::Greater => {
+                s1 = 0.0;
+                s2 = 1.0;
+            }
+            Ordering::Equal => {
+                s1 = 0.5;
+                s2 = 0.5;
+            }
         }
 
         (s1 - e1, s2 - e2)
@@ -173,7 +179,7 @@ mod calculator {
     ) -> Vec<&'a mut Entry> {
         for entry in entries.iter_mut() {
             if let Some(update) = elo_hash.get(entry.id.as_str()) {
-                entry.input_elo = Some(update.clone());
+                entry.input_elo = Some(*update);
             }
         }
 
