@@ -152,7 +152,7 @@ mod calculator {
     ) -> Vec<&'a mut Entry> {
         for entry in entries.iter_mut() {
             if let Some(update) = elo_hash.get(entry.id.as_str()) {
-                entry.input_elo = Some(*update);
+                entry.input_elo = Some(update.clone());
             }
         }
 
@@ -415,5 +415,21 @@ mod tests {
 
         assert_eq!(result[0].input_elo.unwrap(), 123);
         assert_eq!(result[1].input_elo.unwrap(), 456);
+    }
+
+    #[test]
+    fn test_update_event_input_elos_from_previous_event_no_input_elo_field() {
+        let mut player = Entry{id: String::from("1"), name: String::from("DK"), place: 1, ..Default::default()};
+
+        let mut elo_hash = HashMap::new();
+        elo_hash.insert(String::from("1"), 123);
+
+        let result = update_event_input_elos_from_previous_event(
+            vec![&mut player],
+            &elo_hash,
+        );
+
+        assert_eq!(result[0].input_elo.unwrap(), 123);
+
     }
 }

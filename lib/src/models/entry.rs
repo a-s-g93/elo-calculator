@@ -43,7 +43,7 @@ impl Default for Entry {
             id: String::from("0"),
             name: String::from("Unknown"),
             place: 1,
-            input_elo: Some(1000),
+            input_elo: None,
             output_elo: None,
         }
     }
