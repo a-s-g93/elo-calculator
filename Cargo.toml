@@ -3,5 +3,6 @@ members = [
     "lib",
     "cli",
     "api",
-    "python_bindings"
 ]
+exclude = ["python_bindings"]
+resolver = "2"

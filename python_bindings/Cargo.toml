@@ -2,6 +2,7 @@
 name = "elo_calculator"
 version = "0.1.0"
 edition = "2021"
+description = "An elo calculator built in Rust. Capable of calculating elos for 1v1 and multiplayer events."
 
 [lib]
 name = "elo_calculator"

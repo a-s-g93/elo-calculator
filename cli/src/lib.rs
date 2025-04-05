@@ -15,12 +15,9 @@ fn parse_inputs() -> Result<Vec<Entry>, String> {
 
     let mut entries: Vec<Entry> = vec![];
 
+    #[allow(clippy::needless_range_loop)]
     for i in 1..args.len() {
-        let entry =
-            match Entry::from_cli_input(String::from(i.to_string()), i as i8, args[i].clone()) {
-                Ok(ent) => ent,
-                Err(e) => return Err(e),
-            };
+        let entry = Entry::from_cli_input(i.to_string(), i as i8, args[i].clone())?;
 
         entries.push(entry);
     }
@@ -52,7 +49,7 @@ pub fn run() {
 
 /// Demo placeholder
 #[allow(dead_code)]
-pub fn run_demo() -> () {
+pub fn run_demo() {
     let mut entry1 = Entry {
         id: String::from("1"),
         input_elo: Some(1020),
