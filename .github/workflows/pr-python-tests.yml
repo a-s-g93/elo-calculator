@@ -44,7 +44,7 @@ jobs:
         pip install -r requirements-test.txt
     - name: Build and install with Maturin
       run: |
-        cd python_bindings/
+        cd python_bindings
         maturin develop --release
     - name: Test with pytest
       run: |
