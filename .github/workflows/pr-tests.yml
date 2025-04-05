@@ -14,13 +14,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python -m pip install -r requirements-test.txt
       - name: Run Rust Conversion
         run: |
           cd python_bindings
           maturin develop --release
-      - name: Install Dependencies
-        run: |
-          python -m pip install -r requirements-test.txt
       - name: Run unit tests
         run: |
           pytest tests/python
