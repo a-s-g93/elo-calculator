@@ -465,6 +465,5 @@ mod tests {
 
         assert_eq!(result.0, 1031);
         assert_eq!(result.1, 889);
-
     }
 }

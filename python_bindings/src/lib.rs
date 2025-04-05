@@ -2,7 +2,6 @@ use ::elo_calculator as elo_lib;
 use elo_lib::models::Entry;
 use pyo3::prelude::*;
 
-
 /// Update elos for a single group.
 ///
 /// Parameters
