@@ -1,28 +1,47 @@
-name: Elo Calculator PR
-on: pull_request
+name: Test Python Package with Rust
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [ '3.10', '3.11', '3.12' ]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Install Dependencies
-        run: |
-          python -m pip install -r requirements-test.txt
-      - name: Run Rust Conversion
-        run: |
-          cd python_bindings
-          maturin develop --release
-      - name: Run unit tests
-        run: |
-          pytest tests/python
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv venv
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          venv\Scripts\activate.bat
+          echo "VIRTUAL_ENV=$(pwd)/venv" >> $GITHUB_ENV
+          echo "$(pwd)/venv/Scripts" >> $GITHUB_PATH
+        else
+          source venv/bin/activate
+          echo "VIRTUAL_ENV=$(pwd)/venv" >> $GITHUB_ENV
+          echo "$(pwd)/venv/bin" >> $GITHUB_PATH
+        fi
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install maturin pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Build and install with Maturin
+      run: |
+        maturin develop --release
+    - name: Test with pytest
+      run: |
+        pytest
