@@ -164,7 +164,11 @@ jobs:
       contents: write
       # Used to generate artifact attestation
       attestations: write
+      
     steps:
+      - name: Debug Secrets
+        run: |
+          echo "Token exists: ${{ secrets.PYPI_API_TOKEN != '' }}"
       - uses: actions/download-artifact@v4
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
@@ -173,7 +177,6 @@ jobs:
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         with:
-          username: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          token: ${{ secrets.PYPI_API_TOKEN }}
           command: upload
           args: --skip-existing wheels-*/*
