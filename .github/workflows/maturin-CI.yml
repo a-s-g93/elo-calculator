@@ -176,4 +176,4 @@ jobs:
           username: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
           command: upload
-          args: --non-interactive --skip-existing wheels-*/*
+          args: --skip-existing wheels-*/*
