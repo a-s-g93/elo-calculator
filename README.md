@@ -10,7 +10,7 @@ This elo calculator allows for 1v1 as well as multiplayer match calculations. Fo
 
 ## Implementations
 
-### PyPI Package (Unreleased)
+### PyPI Package
 
 Python bindings expose access to the primary classes and functions
 * **Entry** &rarr; represents a player or team
