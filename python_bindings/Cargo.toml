@@ -1,6 +1,6 @@
 [package]
 name = "elo_calculator"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "An elo calculator built in Rust. Capable of calculating elos for 1v1 and multiplayer events."
 
