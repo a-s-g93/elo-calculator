@@ -151,6 +151,14 @@ jobs:
         with:
           name: wheels-sdist
           path: python_bindings/dist
+  
+  Debug:
+    name: Debug
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check pypi token
+        run: |
+          echo "Token exists: ${{ secrets.PYPI_API_TOKEN != '' }}"
 
   release:
     name: Release
@@ -166,9 +174,6 @@ jobs:
       attestations: write
       
     steps:
-      - name: Debug Secrets
-        run: |
-          echo "Token exists: ${{ secrets.PYPI_API_TOKEN != '' }}"
       - uses: actions/download-artifact@v4
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
@@ -176,7 +181,8 @@ jobs:
           subject-path: 'wheels-*/*'
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
-          token: ${{ secrets.PYPI_API_TOKEN }}
           command: upload
-          args: --skip-existing wheels-*/*
+          args: --non-interactive --skip-existing wheels-*/*
