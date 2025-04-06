@@ -10,11 +10,14 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+description = "An elo calculator built in Rust. Capable of calculating elos for 1v1 and multiplayer events."
+readme = "../README.md"
+repository = "https://github.com/a-s-g93/elo-calculator"
 dynamic = ["version"]
 
 [dependencies]
-# maturin = "1.4.0" # Removed build dependency
-# rustimport = "1.4.0" # Removed build dependency
+# maturin = "1.4.0"
+# rustimport = "1.4.0" 
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
