@@ -12,6 +12,10 @@ This elo calculator allows for 1v1 as well as multiplayer match calculations. Fo
 
 ### PyPI Package
 
+```bash
+pip install elo-calculator
+```
+
 Python bindings expose access to the primary classes and functions
 * **Entry** &rarr; represents a player or team
 * **quick_calc** &rarr; calculate new elos between two players without using Entry object
