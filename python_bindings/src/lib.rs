@@ -2,7 +2,7 @@ use ::elo_calculator as elo_lib;
 use elo_lib::models::Entry;
 use pyo3::prelude::*;
 
-/// Update elos for a single group.
+/// Update elos for a 1v1 event.
 ///
 /// Parameters
 /// ----------
@@ -47,7 +47,6 @@ fn update_elos_for_group(mut entries: Vec<Entry>, k: i32) -> PyResult<Vec<Entry>
 
     Ok(entries)
 }
-
 /// Update elos for a sequence of match groups.
 ///
 /// This function processes a series of matches in sequence, where each match
