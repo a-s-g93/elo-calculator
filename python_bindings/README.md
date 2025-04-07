@@ -40,7 +40,7 @@ print(res)
 # ]
 
 # add another event with the same participants
-# note that as long as the `input_elo` only needs to be provided if it is the first occurance of the entry id
+# note that the `input_elo` only needs to be provided if it is the first occurance of the entry id
 a2 = Entry(id="1", name="dk", place=1)
 b2 = Entry(id="2", name="toad", place=2)
 
@@ -58,7 +58,7 @@ print(res2)
 #   ]
 # ]
 
-# simple function for quick calculations with the Entry object
+# simple function for quick calculations without the Entry object
 print(quick_calc(1000, 1234, k))
 # (1025, 1209)
 
